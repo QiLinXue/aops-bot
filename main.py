@@ -1,11 +1,10 @@
 #-----------------------------------------------------------------------------
-# Name:        Discord Cyberbullying Bot
-# Purpose:     To provide a streamlined process removing cyberbullying from
-#              discord using a variety of techniques
+# Name:        Discord AOPS Bot
+# Purpose:     To web scrape the AOPS wiki for problems
 #
 # Author:      QiLin
-# Created:     31-Sep-2018
-# Updated:     01-Oct-2018
+# Created:     09-Oct-2018
+# Updated:     11-Oct-2018
 #-----------------------------------------------------------------------------
 
 # pylint: disable=W0614
@@ -50,23 +49,23 @@ async def on_message(message):
 
     elif inputText.startswith("!aops problem") and inputText.count(' ') > 4:
         args = inputText.split(" ")
-        # try:
-        year = args[2]
-        contest = args[3]
-        form = args[4]
-        problem = args[5]
-        if form == "none":
-            form = ""
-        problemText = extractProblem.extractProblem(year,contest,form,problem)
-        url = 'http://artofproblemsolving.com/wiki/index.php?title=%s_%s_%s_Problems/Problem_%s' % (year, contest, form, problem)
         
-        await client.send_message(message.channel, "Problem: %s " % (problemText))
-        await client.send_message(message.channel, "Problem %s from the %s %s %s contest" % (problem,year,contest,form))
-        await client.send_message(message.channel, "Url is: %s" % url)
+        try:
+            year = args[2]
+            contest = args[3]
+            form = args[4]
+            problem = args[5]
+            if form == "none":
+                form = ""
+            problemText = extractProblem.extractProblem(year,contest,form,problem)
+            url = 'http://artofproblemsolving.com/wiki/index.php?title=%s_%s_%s_Problems/Problem_%s' % (year, contest, form, problem)
+            print(url)
+            await client.send_message(message.channel, "Problem: %s " % (problemText))
+            await client.send_message(message.channel, "Problem %s from the %s %s %s contest" % (problem,year,contest,form))
+            await client.send_message(message.channel, "Url is: %s" % url)
 
-        # except Exception:
-        #     print(str(Exception))
-        #     await client.send_message(message.channel, "Type in !problem [year] [contest] [form] [problem]")
+        except Exception:
+            await client.send_message(message.channel, "Type in !problem [year] [contest] [form] [problem]")
 
     elif inputText.startswith("!aops random"):
         mes = extractProblem.extractRandom()
@@ -76,7 +75,7 @@ async def on_message(message):
         problem = mes[3]
         problemText = mes[4]
         url = 'http://artofproblemsolving.com/wiki/index.php?title=%s_%s_%s_Problems/Problem_%s' % (year, contest, form, problem)
-
+        print(url)
         await client.send_message(message.channel, "Problem: %s " % (problemText))
         await client.send_message(message.channel, "Problem %s from the %s %s %s contest:" % (problem,year,contest,form))
         await client.send_message(message.channel, "Url is: %s" % url)

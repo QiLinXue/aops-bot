@@ -2,6 +2,7 @@ import requests
 import re
 import random
 
+# pylint: disable=W1401
 def extractProblem(year,contest,form,problem):
 
     # Fetch
@@ -13,35 +14,55 @@ def extractProblem(year,contest,form,problem):
     text = "".join(text.splitlines())
 
     # Start and End point
-    text = re.sub(r'.*id="Problem">Problem</span></h2>','',text)
+    text = re.sub(r'.*id="Problem','',text)
     text = re.sub(r'<h2>.*?id="Solution.*','',text)
+    text = re.sub(r'.*?</h2>','',text)
 
     # Remove HTML elements
     text = re.sub(r'<img.*?alt="','',text) # Starting img tag
     text = re.sub(r'<div.*?>','',text) # Starting div tag
     text = re.sub(r'\$"\s.*?"\s>','',text) # Ending Tag
+    text = re.sub(r'\.png"\ssrc=".*?\.(png|jpg)".*?\/>','.png',text) # Alt Ending Tag (image)
     text = re.sub(r'".*?width.*?><\/div>','',text) # Alternate Ending Tag (div)
     text = re.sub(r'<p>|<\/p>','',text) # paragraphs
     text = re.sub(r'<a.*?>|<\/a>','',text) # links
+    text = text.replace('<i>','') # i tag
+    text = text.replace('</i>','') # i tag
+    text = text.replace('<sup>','^(') # replace sup
+    text = text.replace('</sup>',')') # replace sup
 
     # Fractions
     text = re.sub(r'\\frac|\\tfrac','',text)
     text = re.sub(r'}{','/',text)
 
     # Latex Math
+    text = text.replace('\{','{') # replace left bracket
+    text = text.replace('\}','}') # replace right bracket
     text = re.sub(r'\\neq','not equals',text)
-    text = re.sub(r'\\text','',text)
     text = re.sub(r'{rem}','remainder:',text)
-    text = re.sub(r'\\lfloor\s{','floor: {',text)
-    text = re.sub(r'\\rfloor','',text)
     text = re.sub(r'\\%','%',text)
-    text = re.sub(r'\\mathrm','',text)
-    text = text.replace('\\geq',' greater or equal to')
-    text = text.replace('\\overline','(repeating)')
-    text = text.replace('\\cdots',' ... ')
+    text = re.sub(r'\\mathrm','',text) 
+    text = text.replace('\geq',' greater or equal to') # replace \geq
+    text = text.replace('\overline','') # replace \overline (lnie above text)
+    text = text.replace('\cdots',' ... ') # replace \cdots
+    text = text.replace('\ldots',' ... ') # replace \ldots
+    text = text.replace('\cdot',' * ') # replace \cdots
+    text = text.replace('&lt;','<') # replace smaller sign
+    text = text.replace('\langle','<') # replace \langle
+    text = text.replace('\\rangle','>') # replace \rangle
+    text = text.replace('\sqrt','√') # replace \sqrt
+    text = text.replace('\lfloor','⌊') # replace leftfloor
+    text = text.replace('\\rfloor','⌋') # replace rightfloor
+    text = text.replace('\le','≤') # replace \le
+    text = text.replace('\\times','*') # replace \le
+    text = text.replace('\indent','  ') # replace \indent
+    text = text.replace('&amp;','') # replace &amp
+    text = text.replace('\\begin{align*}','[[[') # replace begin align
+    text = text.replace('\end{align*}',']]]') # replace end align
 
     # Latex Formatting
     text = re.sub(r'\\textbf','',text)
+    text = re.sub(r'\\text','',text)
     text = re.sub(r'\\\s',' ',text)
     text = re.sub(r'\\qquad','',text)
 
@@ -53,6 +74,9 @@ def extractProblem(year,contest,form,problem):
     text = re.sub(r'\\\[|\\\]','',text)
     text = re.sub(r'\(\s','(',text) # Answer space
     text = re.sub(r'[^\s]\\choose',' choose',text) # choose
+
+    # Filter items made by extra people
+    text = re.sub(r'\[asy].*?\[\/asy]','',text)
 
     return text
 
@@ -95,7 +119,7 @@ def generateRandom():
 
         if form == "none":
             # AMC 12B
-            form = ""
+            form = "12"
 
             year = str(random.choice(amc_none_contests))
             problem = str(random.choice(amc_problems))
